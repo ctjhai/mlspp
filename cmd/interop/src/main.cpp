@@ -59,6 +59,7 @@ print_sample(uint64_t type)
 
 #define NO_SAMPLE 0xffffffffffffffff
 DEFINE_uint64(sample, NO_SAMPLE, "Generate a sample JSON file (by enum value)");
+DEFINE_string(host, "0.0.0.0", "host/address on which to listen");
 DEFINE_uint64(port, 50001, "Listen for gRPC on this port");
 
 int
@@ -72,7 +73,9 @@ main(int argc, char* argv[])
   }
 
   auto service = MLSClientImpl{};
-  auto server_address = (std::stringstream{} << "0.0.0.0:" << FLAGS_port).str();
+  auto hostport = std::stringstream{};
+  hostport << FLAGS_host << ":" << FLAGS_port;
+  auto server_address = hostport.str();
 
   grpc::EnableDefaultHealthCheckService(true);
   ServerBuilder builder;

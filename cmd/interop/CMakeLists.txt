@@ -10,6 +10,8 @@ set(APP_NAME "mlspp_client")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+message("Compiler: " ${CMAKE_CXX_COMPILER_ID})
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   add_compile_options(-Wall -pedantic -Wextra -Werror -Wmissing-declarations)
 elseif(MSVC)
@@ -21,9 +23,33 @@ endif()
 ###
 find_package(OpenSSL 1.1 REQUIRED)
 
+# PkgConfig-based dependencies
+find_package(PkgConfig)
+
+pkg_check_modules(PC_PROTOBUF REQUIRED protobuf)
+add_library(protobuf::libprotobuf INTERFACE IMPORTED)
+set_target_properties(protobuf::libprotobuf PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES "${PC_PROTOBUF_INCLUDE_DIRS}"
+  INTERFACE_LINK_LIBRARIES "${PC_PROTOBUF_LIBRARIES}"
+  INTERFACE_COMPILE_OPTIONS "${PC_PROTOBUF_CFLAGS_OTHER}"
+  INTERFACE_LINK_OPTIONS "${PC_PROTOBUF_LDFLAGS}")
+
+pkg_check_modules(PC_ZLIB REQUIRED zlib)
+add_library(ZLIB::ZLIB INTERFACE IMPORTED)
+set_target_properties(ZLIB::ZLIB PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES "${PC_ZLIB_INCLUDE_DIRS}"
+  INTERFACE_LINK_LIBRARIES "${PC_ZLIB_LIBRARIES}"
+  INTERFACE_COMPILE_OPTIONS "${PC_ZLIB_CFLAGS_OTHER}"
+  INTERFACE_LINK_OPTIONS "${PC_ZLIB_LDFLAGS}")
+
+message("protobuf libs: " ${PC_PROTOBUF_LIBRARIES})
+message("protobuf LD flags: " ${PC_PROTOBUF_LDFLAGS})
+message("zlib flags: " ${PC_ZLIB_LIBRARIES})
+message("zlib LD flags: " ${PC_ZLIB_LDFLAGS})
+
 # gRPC dependencies
-find_package(Protobuf REQUIRED)
-find_package(gRPC CONFIG REQUIRED)
+#find_package(Protobuf REQUIRED)
+find_package(gRPC REQUIRED)
 find_package(gflags REQUIRED)
 
 # mlspp
